@@ -1,0 +1,1 @@
+set max height and and put overflow = scroll to create a scroll bar
