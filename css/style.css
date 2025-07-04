@@ -9,6 +9,10 @@
     padding: 0;
     font-family: 'Roboto', sans-serif;
 }
+html, body {
+
+  overflow: hidden; /* THIS disables scrolling on the entire page */
+}
 
 .close {
     display: none;
@@ -89,6 +93,10 @@ body {
     padding: 20px;
 }
 
+.heading h2 {
+    font-style: italic;
+}
+
 .spotifyPlaylists {
     padding: 16px;
 }
@@ -103,7 +111,7 @@ body {
     gap: 10px;
     flex-wrap: wrap;
     overflow-y: auto;
-    max-height: 60vh; 
+    max-height: calc(50vh - 28px); 
 }
 
 .card {
