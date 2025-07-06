@@ -16,10 +16,10 @@
 ## Running Locally
 1. **Clone the repository:**  
    ```bash
-   git clone https://github.com/TijilMinocha/SPOTIFY_CLONE.git
+   git clone https://github.com/TijilMinocha/Moodio.git
    ```
 2. **Navigate to the project directory:**  
    ```bash
-   cd SPOTIFY_CLONE
+   cd Moodio
    ```
 4. **Open in browser:** Go to yout local server port` in your web browser to view and use the app.  
