@@ -140,7 +140,7 @@ body {
 .play {
     width: 28px;
     height: 28px;
-    background-color: #1fdf64;
+    background-color: #00c2ff;
     border-radius: 50%;
     padding: 4px;
     display: flex;
@@ -320,6 +320,7 @@ body {
 }
 .range input{
     cursor: pointer;
+    accent-color: #ff3d00;
 }
 
 .abovebar {

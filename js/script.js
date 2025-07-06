@@ -187,29 +187,39 @@ async function main() {
         }
     })
 
-    // Add an event to volume
-    document.querySelector(".range").getElementsByTagName("input")[0].addEventListener("change", (e) => {
-        console.log("Setting volume to", e.target.value, "/ 100")
-        currentSong.volume = parseInt(e.target.value) / 100
-        if (currentSong.volume > 0) {
-            document.querySelector(".volume>img").src = document.querySelector(".volume>img").src.replace("mute.svg", "volume.svg")
-        }
-    })
+    let previousVolume = 1; // Default full volume (1 = 100%)
 
-    // Add event listener to mute the track
-    document.querySelector(".volume>img").addEventListener("click", e => {
+    document.querySelector(".range input").addEventListener("change", (e) => {
+        const newVolume = parseInt(e.target.value) / 100;
+        console.log("Setting volume to", e.target.value, "/ 100");
+        currentSong.volume = newVolume;
+
+        if (newVolume > 0) {
+            previousVolume = newVolume; // Update saved volume
+            document.querySelector(".volume>img").src =
+                document.querySelector(".volume>img").src.replace("mute.svg", "volume.svg");
+        }
+    });
+
+    // Mute/Unmute toggle
+    document.querySelector(".volume>img").addEventListener("click", (e) => {
+        const volumeIcon = document.querySelector(".volume>img");
+        const rangeInput = document.querySelector(".range input");
+
         if (e.target.src.includes("volume.svg")) {
-            e.target.src = e.target.src.replace("volume.svg", "mute.svg")
+            // Save current volume before muting
+            previousVolume = currentSong.volume || 0.5;
             currentSong.volume = 0;
-            document.querySelector(".range").getElementsByTagName("input")[0].value = 0;
+            rangeInput.value = 0;
+            volumeIcon.src = volumeIcon.src.replace("volume.svg", "mute.svg");
+        } else {
+            // Restore previous volume on unmute
+            currentSong.volume = previousVolume;
+            rangeInput.value = previousVolume * 100;
+            volumeIcon.src = volumeIcon.src.replace("mute.svg", "volume.svg");
         }
-        else {
-            e.target.src = e.target.src.replace("mute.svg", "volume.svg")
-            currentSong.volume = .10;
-            document.querySelector(".range").getElementsByTagName("input")[0].value = 10;
-        }
+    });
 
-    })
 
 
 
