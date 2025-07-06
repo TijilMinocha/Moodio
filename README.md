@@ -1,6 +1,6 @@
 # Moodio
 
-- **Overview:** Moodio is a web-based music streaming application built entirely with HTML, CSS, and JavaScript. It offers users a simple, responsive interface to play music directly from predefined playlists of local audio files. Inspired by modern music platforms, Moodio lets anyone enjoy curated playlists in the browser without any backend – just open the project in a browser and start listening.
+**Overview:** Moodio is a web-based music streaming application built entirely with HTML, CSS, and JavaScript. It offers users a simple, responsive interface to play music directly from predefined playlists of local audio files. Inspired by modern music platforms, Moodio lets anyone enjoy curated playlists in the browser without any backend – just open the project in a browser and start listening.
 ## Tech Stack
 - **HTML5**  
 - **CSS3** 
