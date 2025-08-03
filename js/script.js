@@ -1,5 +1,5 @@
 console.log('Lets write JavaScript');
-let currentSong = new Audio();
+let currentSong = new Audio(); //playing audio in js - new audio element in html
 let songs;
 let currFolder;
 
@@ -11,21 +11,23 @@ function secondsToMinutesSeconds(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
 
-    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0'); // to convert single digits to 0-digit eg 1 -> 01
     const formattedSeconds = String(remainingSeconds).padStart(2, '0');
 
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
+
+// getting songs href link by fetching in the anchor tag
 async function getSongs(folder) {
     currFolder = folder;
-    let a = await fetch(`/${folder}/`)
+    let a = await fetch(`/${folder}/`) //each a tag refers to sub folder of songs folder
     let response = await a.text();
     let div = document.createElement("div")
-    div.innerHTML = response;
+    div.innerHTML = response; // inserting the fetch api response to the div
     let as = div.getElementsByTagName("a")
     songs = []
-    for (let index = 0; index < as.length; index++) {
+    for (let index = 0; index < as.length; index++) { // collecting all links(anchor tags) filtering them by mp3 format and pushing into the songs array
         const element = as[index];
         if (element.href.endsWith(".mp3")) {
             songs.push(element.href.split(`/${folder}/`)[1])
@@ -34,9 +36,9 @@ async function getSongs(folder) {
 
 
 
-    // Show all the songs in the playlist
+    // Show all the songs in the queue
     let songUL = document.querySelector(".songList").getElementsByTagName("ul")[0]
-    songUL.innerHTML = ""
+    songUL.innerHTML = "" //
     for (const song of songs) {
         let songName = decodeURIComponent(song).replace(/\.mp3$/i, ""); // clean name
         songUL.innerHTML += `<li><img class="invert" width="34" src="img/music.svg" alt="">
@@ -50,10 +52,10 @@ async function getSongs(folder) {
         </div> </li>`;
     }
 
-    // Attach an event listener to each song
+    // Attach an event listener to each song - play song on clicking the song card in the queue
     Array.from(document.querySelector(".songList").getElementsByTagName("li")).forEach(e => {
         e.addEventListener("click", element => {
-            playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim())
+            playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim()) //
 
         })
     })
@@ -64,7 +66,7 @@ async function getSongs(folder) {
 const playMusic = (track, pause = false) => {
     currentSong.src = `/${currFolder}/` + track
     if (!pause) {
-        currentSong.play()
+        currentSong.play() 
         play.src = "img/pause.svg"
     }
     if (track) {
@@ -79,6 +81,8 @@ const playMusic = (track, pause = false) => {
 
 }
 
+
+//creating playlists card based on subfolders - parses the song folder - extracts all subfolders - extracts json files, card_image - updates the inner html of each card
 async function displayAlbums() {
     console.log("displaying albums")
     let a = await fetch(`/songs/`)
@@ -115,8 +119,8 @@ async function displayAlbums() {
     Array.from(document.getElementsByClassName("card")).forEach(e => {
         e.addEventListener("click", async item => {
             console.log("Fetching Songs")
-            songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`)
-            playMusic(songs[0])
+            songs = await getSongs(`songs/${item.currentTarget.dataset.folder}`) // - gets the songs from playlists folder - into the songs array
+            playMusic(songs[0]) // starts playing the first song
 
         })
     })
@@ -125,7 +129,7 @@ async function displayAlbums() {
 async function main() {
     // Get the list of all the songs
     await getSongs("songs/ncs")
-    playMusic(songs[0], true)
+    playMusic(songs[0], true) // first song setup but with pause to load rest of the ui
 
     // Display all the albums on the page
     await displayAlbums()
@@ -146,12 +150,12 @@ async function main() {
     // Listen for timeupdate event
     currentSong.addEventListener("timeupdate", () => {
         document.querySelector(".songtime").innerHTML = `${secondsToMinutesSeconds(currentSong.currentTime)} / ${secondsToMinutesSeconds(currentSong.duration)}`
-        document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%";
+        document.querySelector(".circle").style.left = (currentSong.currentTime / currentSong.duration) * 100 + "%"; // - moving the seekbar circle by changing its position from left - based on the percentage of song played
     })
 
     // Add an event listener to seekbar
     document.querySelector(".seekbar").addEventListener("click", e => {
-        let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
+        let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100; //
         document.querySelector(".circle").style.left = percent + "%";
         currentSong.currentTime = ((currentSong.duration) * percent) / 100
     })
@@ -168,7 +172,7 @@ async function main() {
 
     // Add an event listener to previous
     previous.addEventListener("click", () => {
-        currentSong.pause()
+        currentSong.pause() // pause the current song
         console.log("Previous clicked")
         let index = songs.indexOf(currentSong.src.split("/").slice(-1)[0])
         if ((index - 1) >= 0) {
@@ -190,7 +194,7 @@ async function main() {
     let previousVolume = 1; // Default full volume (1 = 100%)
 
     document.querySelector(".range input").addEventListener("change", (e) => {
-        const newVolume = parseInt(e.target.value) / 100;
+        const newVolume = parseInt(e.target.value) / 100; // value lies between 0 & 1
         console.log("Setting volume to", e.target.value, "/ 100");
         currentSong.volume = newVolume;
 
