@@ -1,7 +1,6 @@
-# Spotify Clone
+# Moodio - Audio for all your Moods
 
-- **Overview:** Fully responsive Spotify-like music player UI built with HTML5, CSS3, and JavaScript (front-end only, no backend integration).
-
+**Overview:** Moodio is a web-based music streaming application built entirely with HTML, CSS, and JavaScript. It offers users a simple, responsive interface to play music directly from predefined playlists of local audio files. Inspired by modern music platforms, Moodio lets anyone enjoy curated playlists in the browser without any backend – just open the project in a browser and start listening.
 ## Tech Stack
 - **HTML5**  
 - **CSS3** 
@@ -17,10 +16,10 @@
 ## Running Locally
 1. **Clone the repository:**  
    ```bash
-   git clone https://github.com/TijilMinocha/SPOTIFY_CLONE.git
+   git clone https://github.com/TijilMinocha/Moodio.git
    ```
 2. **Navigate to the project directory:**  
    ```bash
-   cd SPOTIFY_CLONE
+   cd Moodio
    ```
 4. **Open in browser:** Go to yout local server port` in your web browser to view and use the app.  
