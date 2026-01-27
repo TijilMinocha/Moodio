@@ -331,21 +331,21 @@ body {
 }
 
 @media (max-width: 1200px) {
+    /* Keep your sidebar fixed but accessible */
     .left {
-        position: absolute;
+        position: fixed;
         left: -130%;
         transition: all .3s;
-        z-index: 1;
+        z-index: 10;
         width: 373px;
         background-color: black;
         padding: 0;
         height: 100vh;
-        position: fixed;
         top: 0;
     }
 
-    .songinfo,
-    .songtime {
+    /* Standard responsive resets you already had */
+    .songinfo, .songtime {
         width: auto;
     }
 
@@ -358,39 +358,49 @@ body {
 
     .timevol {
         display: flex;
-        justify-content: space-evenly;
-        align-items: center;
         flex-direction: column;
         gap: 13px;
     }
 
     .right {
         width: 100vw;
+        margin: 0;
+        /* Force the right section to be the height of the screen minus playbar */
+        height: 100vh; 
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* PLAYLIST SCROLL FIX: This creates the "Inside Scroll" you want */
+    .cardContainer {
+        margin: 10px;
+        display: flex;
+        gap: 10px; /* Space between cards */
+        flex-wrap: wrap;
+        justify-content: center; /* Centers the two columns */
+        overflow-y: auto; 
+        max-height: 60vh; /* Keeps the internal scroll you wanted */
+    }
+
+    .card {
+        /* This is the magic number for 2 columns */
+        width: calc(50% - 30px);
+        min-width: 150px; /* Prevents them from getting too squished */
+        padding: 8px;
     }
 
     .playbar {
-        width: calc(100vw - 75px); 
+        width: 92vw;
+        left: 4vw;
+        bottom: 20px;
     }
 
     .seekbar {
-        width: calc(100vw - 120px);
+        width: 90%;
     }
 
     .hamburger {
         display: block;
-    }
-
-    .right {
-        margin: 0;
-    }
-
-    .card {
-        width: 55vw;
-    }
-
-    .cardContainer {
-        margin: 0;
-        justify-content: center; 
     }
 
     .close {
@@ -399,51 +409,22 @@ body {
 
     .abovebar {
         flex-direction: column;
-        gap: 23px;
+        gap: 15px;
         align-items: center;
-    }
-
-    .cardContainer {
-        max-height: unset;
-        overflow-y: unset;
-        margin-bottom: 35vh;
-    }
-
-    .playbar{
-        right: 25px;
     }
 }
 
 @media (max-width: 500px) {
+    /* Ensuring the 2-card layout stays on small phones */
     .card {
-        width: 100%;
+        width: calc(50% - 30x); 
     }
-
-    .header>* {
-        padding: 2px;
+    .playbar {
+        width: 92vw;
+        left: 5px;
+        bottom: auto;
     }
-
-    .buttons>* {
-        margin: 0 6px;
-    }
-
-    .header{
-        padding: 7px;
-    }
-
-    .spotifyPlaylists h1 {
-        padding: 4px;
-    }
-
-    .library{
-        height: 85vh;
-    }
-
-    .left{ 
+    .left { 
         width: 100vw;
     }
-
- 
-
-    
 }
