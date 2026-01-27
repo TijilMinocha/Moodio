@@ -331,34 +331,16 @@ body {
 }
 
 @media (max-width: 1200px) {
-    /* Keep your sidebar fixed but accessible */
     .left {
         position: fixed;
         left: -130%;
         transition: all .3s;
-        z-index: 100; /* Increased to stay above everything */
+        z-index: 100;
         width: 373px;
         background-color: black;
         padding: 0;
         height: 100vh;
         top: 0;
-    }
-
-    .songinfo, .songtime {
-        width: auto;
-    }
-
-    .left .close {
-        position: absolute;
-        right: 31px;
-        top: 25px;
-        width: 29px;
-    }
-
-    .timevol {
-        display: flex;
-        flex-direction: column;
-        gap: 13px;
     }
 
     .right {
@@ -367,10 +349,10 @@ body {
         height: 100vh; 
         display: flex;
         flex-direction: column;
-        overflow: hidden; /* Keeps the main page still while container scrolls */
+        overflow: hidden; 
     }
 
-    /* Playlist Scroll Fix */
+    /* --- TWO COLUMN & SCROLL FIX --- */
     .cardContainer {
         margin: 10px;
         display: flex;
@@ -378,64 +360,63 @@ body {
         flex-wrap: wrap;
         justify-content: center; 
         overflow-y: auto; 
-        max-height: 65vh; 
-        padding-bottom: 50px; /* Space so last cards aren't hidden */
+        max-height: 70vh; 
+        /* Adds extra space so the last row can scroll ABOVE the playbar */
+        padding-bottom: 180px; 
     }
 
     .card {
-        /* Reduced subtraction to ensure 2 cards fit side-by-side */
-        width: calc(50% - 15px); 
-        min-width: 140px; /* Slightly lowered to fit narrow screens */
-        padding: 8px;
+        /* 46% leaves enough room for the 10px gap to keep 2 in a row */
+        width: 46%; 
+        min-width: 140px; 
+        padding: 10px;
     }
 
-    /* FIXING THE PLAYBAR FOR PHONES */
+    /* --- COMPACT PLAYBAR --- */
     .playbar {
         width: 95vw;
         left: 50%;
-        transform: translateX(-50%); /* Perfectly centers it */
-        bottom: 10px; /* Moves it slightly up from the very edge */
+        transform: translateX(-50%);
+        bottom: 15px;
         position: fixed;
         z-index: 50;
+        /* Reducing height and padding */
+        min-height: 30px; 
+        padding: 8px;
     }
 
     .seekbar {
         width: 95%;
+        bottom: 5px; /* Tighter seekbar placement */
     }
 
-    .hamburger {
-        display: block;
-    }
-
-    .close {
-        display: block;
-    }
+    .hamburger { display: block; }
+    .close { display: block; }
 
     .abovebar {
         flex-direction: column;
-        gap: 15px;
+        gap: 10px;
         align-items: center;
+        margin: 10px 0;
     }
 }
 
 @media (max-width: 500px) {
     .card {
-        /* Adjusted specifically for very narrow mobile views */
-        width: calc(50% - 12px); 
+        width: 45%; /* Slightly smaller for very narrow phones */
     }
     
-    .playbar {
-        width: 95vw;
-        bottom: 5px; /* Keeps it visible and usable near the bottom thumb area */
-    }
-
     .left { 
         width: 100vw;
     }
-    
-    /* Makes song info readable on mobile */
+
     .songinfo {
-        width: 150px;
-        font-size: 14px;
+        width: 130px;
+        font-size: 13px;
+    }
+    
+    /* Shrinking playbar elements further for tiny screens */
+    .songbuttons img {
+        width: 25px;
     }
 }
