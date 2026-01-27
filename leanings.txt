@@ -1,1 +1,8 @@
 set max height and and put overflow = scroll to create a scroll bar
+
+@media (max-width: 500px) {
+    .playbar {
+        width: 92vw;
+        left: 5px;
+        bottom: auto;
+    }

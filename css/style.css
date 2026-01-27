@@ -423,4 +423,20 @@ body {
     .left { 
         width: 100vw;
     }
+
+    .playbar {
+        width: 92vw;
+        left: 1vw;
+        bottom: 20px;
+        height: 19vh;
+    }
+    .cardContainer {
+        margin: 10px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+        overflow-y: scroll;
+        max-height: 50;
+    }
 }
