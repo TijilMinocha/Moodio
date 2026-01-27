@@ -437,6 +437,6 @@ body {
         flex-wrap: wrap;
         justify-content: center;
         overflow-y: scroll;
-        max-height: 50;
+        height: 40vh
     }
 }
