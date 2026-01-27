@@ -1,0 +1,77 @@
+Folder PATH listing
+Volume serial number is F4D0-0FA8
+D:.
+¦   .htaccess
+¦   list.txt
+¦   
++---ARIJIT
+¦       Apna Bana Le - Arijit Singh.mp3
+¦       cover.jpg
+¦       info.json
+¦       Ve Kamleya  - Arijit Singh & Shreya Ghoshal.mp3
+¦       Zamaana Lage  - Arijit Singh.mp3
+¦       
++---DHH
+¦       cover.jpg
+¦       info.json
+¦       Namastute - Seedhe Maut.mp3
+¦       NO CAP - KR$NA.mp3
+¦       SHEIKH CHILLI - RAFTAAR.mp3
+¦       
++---Diljit
+¦       Born To Shine - Diljit Dosanjh.mp3
+¦       CLASH - Diljit Dosanjh.mp3
+¦       cover.jpg
+¦       info.json
+¦       Laembadgini - Diljit Dosanjh.mp3
+¦       
++---ENGLISH
+¦       cover.jpg
+¦       Ed Sheeran - Shape of You.mp3
+¦       info.json
+¦       Taylor Swift - Look What You Made Me Do.mp3
+¦       
++---karan aujla
+¦       cover.jpg
+¦       info.json
+¦       Jee Ni Lagda - Karan Aujla.mp3
+¦       On Top - Karan Aujla.mp3
+¦       SOFTLY - Karan Aujla.mp3
+¦       
++---Love_(mood)
+¦       Chaandaniya - Multiple Artists.mp3
+¦       cover.jpg
+¦       info.json
+¦       Kesariya - Multiple Artists.mp3
+¦       
++---PARTY
+¦       cover.jpg
+¦       info.json
+¦       Lahore - Guru Randhawa.mp3
+¦       Wakhra Swag - Navv Inder feat. Badshah.mp3
+¦       
++---Punjabi
+¦       Bijlee Bijlee - Harrdy Sandhu.mp3
+¦       cover.jpg
+¦       DIL NU - AP DHILLON, SHINDA KAHLON.mp3
+¦       info.json
+¦       MUMMY NU PASAND - SUNANDA SHARMA.mp3
+¦       
++---SATINDER SARTAJ
+¦       cover.jpg
+¦       Ikko - Mikke  - Satinder Sartaj.mp3
+¦       info.json
+¦       Udaarian - Satinder Sartaaj.mp3
+¦       
++---SHREYA
+¦       Chori Kiya Re - Shreya Ghoshal,  Sonu Nigam.mp3
+¦       cover.jpg
+¦       info.json
+¦       Saibo - Sachin-Jigar, Shreya Ghosha, Tochi Raina.mp3
+¦       
++---SONU NIGAM
+        cover.jpg
+        info.json
+        Mere Dholna 3.0  - Sonu Nigam.mp3
+        Phir Milenge Chalte Chalte - Sonu Nigam.mp3
+        
