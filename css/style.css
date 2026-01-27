@@ -331,11 +331,12 @@ body {
 }
 
 @media (max-width: 1200px) {
+    /* Keep your sidebar fixed but accessible */
     .left {
         position: fixed;
         left: -130%;
         transition: all .3s;
-        z-index: 100;
+        z-index: 10;
         width: 373px;
         background-color: black;
         padding: 0;
@@ -343,80 +344,83 @@ body {
         top: 0;
     }
 
+    /* Standard responsive resets you already had */
+    .songinfo, .songtime {
+        width: auto;
+    }
+
+    .left .close {
+        position: absolute;
+        right: 31px;
+        top: 25px;
+        width: 29px;
+    }
+
+    .timevol {
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+    }
+
     .right {
         width: 100vw;
         margin: 0;
+        /* Force the right section to be the height of the screen minus playbar */
         height: 100vh; 
         display: flex;
         flex-direction: column;
-        overflow: hidden; 
     }
 
-    /* --- TWO COLUMN & SCROLL FIX --- */
+    /* PLAYLIST SCROLL FIX: This creates the "Inside Scroll" you want */
     .cardContainer {
         margin: 10px;
         display: flex;
-        gap: 10px; 
+        gap: 10px; /* Space between cards */
         flex-wrap: wrap;
-        justify-content: center; 
+        justify-content: center; /* Centers the two columns */
         overflow-y: auto; 
-        max-height: 70vh; 
-        /* Adds extra space so the last row can scroll ABOVE the playbar */
-        padding-bottom: 180px; 
+        max-height: 60vh; /* Keeps the internal scroll you wanted */
     }
 
     .card {
-        /* 46% leaves enough room for the 10px gap to keep 2 in a row */
-        width: 46%; 
-        min-width: 140px; 
-        padding: 10px;
-    }
-
-    /* --- COMPACT PLAYBAR --- */
-    .playbar {
-        width: 95vw;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 15px;
-        position: fixed;
-        z-index: 50;
-        /* Reducing height and padding */
-        min-height: 30px; 
+        /* This is the magic number for 2 columns */
+        width: calc(50% - 30px);
+        min-width: 150px; /* Prevents them from getting too squished */
         padding: 8px;
     }
 
-    .seekbar {
-        width: 95%;
-        bottom: 5px; /* Tighter seekbar placement */
+    .playbar {
+        width: 92vw;
+        left: 4vw;
+        bottom: 20px;
     }
 
-    .hamburger { display: block; }
-    .close { display: block; }
+    .seekbar {
+        width: 90%;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .close {
+        display: block;
+    }
 
     .abovebar {
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
         align-items: center;
-        margin: 10px 0;
     }
 }
 
 @media (max-width: 500px) {
+    /* Ensuring the 2-card layout stays on small phones */
     .card {
-        width: 45%; /* Slightly smaller for very narrow phones */
+        width: calc(50% - 30px);
     }
     
     .left { 
         width: 100vw;
-    }
-
-    .songinfo {
-        width: 130px;
-        font-size: 13px;
-    }
-    
-    /* Shrinking playbar elements further for tiny screens */
-    .songbuttons img {
-        width: 25px;
     }
 }
