@@ -336,7 +336,7 @@ body {
         position: fixed;
         left: -130%;
         transition: all .3s;
-        z-index: 10;
+        z-index: 100; /* Increased to stay above everything */
         width: 373px;
         background-color: black;
         padding: 0;
@@ -344,7 +344,6 @@ body {
         top: 0;
     }
 
-    /* Standard responsive resets you already had */
     .songinfo, .songtime {
         width: auto;
     }
@@ -365,38 +364,43 @@ body {
     .right {
         width: 100vw;
         margin: 0;
-        /* Force the right section to be the height of the screen minus playbar */
         height: 100vh; 
         display: flex;
         flex-direction: column;
+        overflow: hidden; /* Keeps the main page still while container scrolls */
     }
 
-    /* PLAYLIST SCROLL FIX: This creates the "Inside Scroll" you want */
+    /* Playlist Scroll Fix */
     .cardContainer {
         margin: 10px;
         display: flex;
-        gap: 10px; /* Space between cards */
+        gap: 10px; 
         flex-wrap: wrap;
-        justify-content: center; /* Centers the two columns */
+        justify-content: center; 
         overflow-y: auto; 
-        max-height: 60vh; /* Keeps the internal scroll you wanted */
+        max-height: 65vh; 
+        padding-bottom: 50px; /* Space so last cards aren't hidden */
     }
 
     .card {
-        /* This is the magic number for 2 columns */
-        width: calc(50% - 30px);
-        min-width: 150px; /* Prevents them from getting too squished */
+        /* Reduced subtraction to ensure 2 cards fit side-by-side */
+        width: calc(50% - 15px); 
+        min-width: 140px; /* Slightly lowered to fit narrow screens */
         padding: 8px;
     }
 
+    /* FIXING THE PLAYBAR FOR PHONES */
     .playbar {
-        width: 92vw;
-        left: 4vw;
-        bottom: 20px;
+        width: 95vw;
+        left: 50%;
+        transform: translateX(-50%); /* Perfectly centers it */
+        bottom: 10px; /* Moves it slightly up from the very edge */
+        position: fixed;
+        z-index: 50;
     }
 
     .seekbar {
-        width: 90%;
+        width: 95%;
     }
 
     .hamburger {
@@ -415,16 +419,23 @@ body {
 }
 
 @media (max-width: 500px) {
-    /* Ensuring the 2-card layout stays on small phones */
     .card {
-        width: calc(50% - 30x); 
+        /* Adjusted specifically for very narrow mobile views */
+        width: calc(50% - 12px); 
     }
+    
     .playbar {
-        width: 92vw;
-        left: 5px;
-        bottom: auto;
+        width: 95vw;
+        bottom: 5px; /* Keeps it visible and usable near the bottom thumb area */
     }
+
     .left { 
         width: 100vw;
+    }
+    
+    /* Makes song info readable on mobile */
+    .songinfo {
+        width: 150px;
+        font-size: 14px;
     }
 }
