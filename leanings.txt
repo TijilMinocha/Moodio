@@ -6,3 +6,164 @@ set max height and and put overflow = scroll to create a scroll bar
         left: 5px;
         bottom: auto;
     }
+
+
+WHAT IS ES6?
+
+ES6 stands for ECMAScript 2015. ECMAScript is the official specification that defines how JavaScript should work. ES6 was a major update that modernized JavaScript and made it suitable for large-scale applications.
+
+Before ES6, JavaScript code was verbose, difficult to maintain, and error-prone. ES6 introduced cleaner syntax and powerful features that improved readability, safety, and developer productivity.
+
+Important ES6 features used in this project:
+
+let and const:
+let allows block-scoped variables.
+const is used for values that should not be reassigned.
+This prevents accidental overwriting of variables.
+
+Arrow functions:
+Shorter syntax for functions.
+They use lexical scoping for this, which avoids common bugs in callbacks.
+
+Template literals:
+Use backticks instead of quotes.
+Allow variable interpolation and multi-line strings.
+
+Default parameters:
+Functions can have default values for arguments.
+
+async / await:
+Makes asynchronous code look synchronous.
+Built on top of Promises.
+Improves readability and error handling.
+
+Interview one-liner:
+ES6 modernized JavaScript by introducing features like let/const, arrow functions, template literals, and async/await, making code cleaner and more scalable.
+
+WHAT IS new Audio()?
+
+new Audio() creates an HTMLAudioElement object in JavaScript. This object represents an audio player that can play, pause, seek, and control volume programmatically.
+
+It is equivalent to creating an <audio> tag in HTML, but it is created entirely using JavaScript.
+
+The Audio object provides:
+
+Properties: src, currentTime, duration, volume, paused
+
+Methods: play(), pause()
+
+Events: timeupdate, ended, loadedmetadata
+
+In this project, the Audio object allows full control over music playback without relying on HTML audio controls.
+
+Why use new Audio() instead of <audio> tag?
+
+Cleaner HTML
+
+Dynamic control from JavaScript
+
+Easier to manage multiple songs
+
+Interview one-liner:
+Audio() creates an HTMLAudioElement that allows programmatic control of audio playback using JavaScript.
+
+WHAT DOES fetch() RETURN?
+
+fetch() is used to make HTTP requests. It returns a Promise that resolves to a Response object.
+
+The flow is:
+
+fetch(url)
+→ returns a Promise
+→ resolves to a Response object
+→ Response body must be parsed using .json(), .text(), etc.
+
+In the project:
+
+fetch() gets info.json from the server
+
+await pauses execution until the request completes
+
+response.json() converts JSON data into a JavaScript object
+
+Two awaits are required because:
+
+fetch() is asynchronous
+
+parsing JSON is also asynchronous
+
+Interview one-liner:
+fetch() returns a Promise that resolves to a Response object, which must be parsed to access the actual data.
+
+WHAT IS AN SVG FILE?
+
+SVG stands for Scalable Vector Graphics.
+
+SVG files describe images using mathematical paths instead of pixels. This makes them resolution-independent.
+
+Advantages of SVG:
+
+Scales infinitely without losing quality
+
+Very small file size
+
+Perfect for icons and UI elements
+
+Can be styled or animated
+
+In this project, SVG is used for play, pause, volume, and mute icons to keep the UI sharp on all screen sizes.
+
+Interview one-liner:
+SVG is a vector-based image format ideal for icons because it scales without losing quality.
+
+WHAT DOES /i DO IN REGEX?
+
+Example:
+song.replace(/.mp3$/i, "")
+
+The /i flag makes the regular expression case-insensitive.
+
+Without /i:
+
+"song.mp3" matches
+
+"SONG.MP3" does not match
+
+With /i:
+
+Both "song.mp3" and "SONG.MP3" match
+
+This ensures consistent behavior regardless of filename casing.
+
+Interview one-liner:
+The /i flag makes a regular expression case-insensitive.
+
+WHY firstElementChild.innerHTML.trim() IS USED
+
+This chain is used to safely extract clean text from the DOM.
+
+Step-by-step:
+
+querySelector(".info"):
+Selects the element with class "info".
+
+firstElementChild:
+Gets the first HTML element inside the selected element.
+This avoids text nodes and whitespace issues.
+
+innerHTML:
+Extracts the content inside the element as a string.
+
+trim():
+Removes leading and trailing whitespace and newlines.
+
+Why this is important:
+
+Ensures accurate song names
+
+Prevents bugs during string comparison
+
+Avoids mismatches in song selection logic
+
+Interview one-liner:
+firstElementChild.innerHTML.trim() safely extracts clean text from the DOM while avoiding whitespace and text nodes.
