@@ -78,9 +78,18 @@ export async function signUp(
 
   if (error) return { error: error.message };
 
-  // With email confirmation enabled, no session comes back yet.
+  // No session means email confirmation is enabled and Supabase has sent a
+  // link -- OR the address was already registered, in which case Supabase
+  // silently does nothing rather than confirm the address exists (that would
+  // let anyone enumerate registered users). We cannot tell the two apart, so
+  // the message must be true in both cases. Saying "we sent you an email"
+  // outright is what made the duplicate-signup bug so confusing to debug.
   if (!data.session) {
-    return { error: "Check your email to confirm your account, then log in." };
+    return {
+      error:
+        "If that email isn't already registered, we've sent a confirmation link. " +
+        "Already have an account? Log in instead.",
+    };
   }
 
   revalidatePath("/", "layout");

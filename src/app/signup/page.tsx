@@ -1,6 +1,15 @@
-import { AuthForm } from "@/components/AuthForm";
-import { signUp } from "@/app/auth/actions";
+import { Landing } from "@/components/Landing";
+import { getAlbums } from "@/lib/data";
 
-export default function SignupPage() {
-  return <AuthForm mode="signup" action={signUp} />;
+export const dynamic = "force-dynamic";
+
+export default async function SignupPage() {
+  const albums = await getAlbums();
+
+  return (
+    <Landing
+      mode="signup"
+      covers={albums.map((a) => a.coverUrl).filter((c): c is string => !!c)}
+    />
+  );
 }

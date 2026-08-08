@@ -32,6 +32,7 @@ interface PlayerState {
 
 interface PlayerActions {
   playQueue: (songs: SongDTO[], startIndex?: number) => void;
+  shufflePlay: (songs: SongDTO[]) => void;
   togglePlay: () => void;
   next: () => void;
   previous: () => void;
@@ -92,6 +93,23 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [repeat]);
 
   const current = queue[index] ?? null;
+
+  /**
+   * Rebuild the playback order. Passing the artist lookup lets shuffle spread
+   * same-artist tracks apart instead of letting them cluster -- see
+   * spreadByArtist for why uniform randomness feels broken to listeners.
+   */
+  const rebuildOrder = useCallback(
+    (songs: SongDTO[], on: boolean, startAt: number) => {
+      playOrderRef.current = buildPlayOrder(
+        songs.length,
+        on,
+        startAt,
+        (i) => songs[i]?.artist ?? "",
+      );
+    },
+    [],
+  );
 
   /** Fetch a fresh signed URL and point the audio element at it. */
   const loadSong = useCallback(async (song: SongDTO, autoplay: boolean) => {
@@ -216,10 +234,29 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     (songs: SongDTO[], startIndex = 0) => {
       if (songs.length === 0) return;
       setQueue(songs);
-      playOrderRef.current = buildPlayOrder(songs.length, shuffle, startIndex);
+      rebuildOrder(songs, shuffle, startIndex);
       setIndex(startIndex);
     },
-    [shuffle],
+    [shuffle, rebuildOrder],
+  );
+
+  /**
+   * Start a list shuffled in one action: turn shuffle on, pick a random
+   * opening track, and build the spread order around it. Without this the user
+   * has to press play, then toggle shuffle, which starts track 1 first and
+   * only shuffles what comes after -- not what "shuffle play" means anywhere
+   * else.
+   */
+  const shufflePlay = useCallback(
+    (songs: SongDTO[]) => {
+      if (songs.length === 0) return;
+      const start = Math.floor(Math.random() * songs.length);
+      setQueue(songs);
+      setShuffle(true);
+      rebuildOrder(songs, true, start);
+      setIndex(start);
+    },
+    [rebuildOrder],
   );
 
   const togglePlay = useCallback(() => {
@@ -245,10 +282,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const toggleShuffle = useCallback(() => {
     setShuffle((on) => {
       const nextOn = !on;
-      playOrderRef.current = buildPlayOrder(queue.length, nextOn, index);
+      rebuildOrder(queue, nextOn, index);
       return nextOn;
     });
-  }, [queue.length, index]);
+  }, [queue, index, rebuildOrder]);
 
   const cycleRepeat = useCallback(() => {
     setRepeat((mode) =>
@@ -271,11 +308,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const without = q.filter((s) => s.id !== song.id);
         const at = Math.min(index + 1, without.length);
         const next = [...without.slice(0, at), song, ...without.slice(at)];
-        playOrderRef.current = buildPlayOrder(next.length, shuffle, index);
+        rebuildOrder(next, shuffle, index);
         return next;
       });
     },
-    [index, shuffle],
+    [index, shuffle, rebuildOrder],
   );
 
   /**
@@ -290,12 +327,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const next = q.filter((s) => s.id !== songId);
         const stillPlaying = next.findIndex((s) => s.id === currentId);
         const newIndex = stillPlaying === -1 ? 0 : stillPlaying;
-        playOrderRef.current = buildPlayOrder(next.length, shuffle, newIndex);
+        rebuildOrder(next, shuffle, newIndex);
         setIndex(newIndex);
         return next;
       });
     },
-    [currentId, shuffle],
+    [currentId, shuffle, rebuildOrder],
   );
 
   const reorderQueue = useCallback(
@@ -312,12 +349,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
         const newIndex = next.findIndex((s) => s.id === currentId);
         const safeIndex = newIndex === -1 ? 0 : newIndex;
-        playOrderRef.current = buildPlayOrder(next.length, shuffle, safeIndex);
+        rebuildOrder(next, shuffle, safeIndex);
         setIndex(safeIndex);
         return next;
       });
     },
-    [currentId, shuffle],
+    [currentId, shuffle, rebuildOrder],
   );
 
   const jumpTo = useCallback((songId: string) => {
@@ -358,6 +395,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       loading,
       error,
       playQueue,
+      shufflePlay,
       togglePlay,
       next: () => advance(1),
       previous: () => advance(-1),
@@ -375,7 +413,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       queue, index, current, isPlaying, currentTime, duration, volume, muted,
-      shuffle, repeat, loading, error, playQueue, togglePlay, advance,
+      shuffle, repeat, loading, error, playQueue, shufflePlay, togglePlay, advance,
       seekToFraction, setVolume, toggleShuffle, cycleRepeat, addToQueue,
       playNext, removeFromQueue, reorderQueue, clearQueue, jumpTo,
     ],

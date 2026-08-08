@@ -1,5 +1,7 @@
-import { AuthForm } from "@/components/AuthForm";
-import { signIn } from "@/app/auth/actions";
+import { Landing } from "@/components/Landing";
+import { getAlbums } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
 
 export default async function LoginPage({
   searchParams,
@@ -7,5 +9,13 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const { next } = await searchParams;
-  return <AuthForm mode="login" action={signIn} next={next} />;
+  const albums = await getAlbums();
+
+  return (
+    <Landing
+      mode="login"
+      next={next}
+      covers={albums.map((a) => a.coverUrl).filter((c): c is string => !!c)}
+    />
+  );
 }

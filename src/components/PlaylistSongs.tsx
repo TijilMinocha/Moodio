@@ -50,14 +50,14 @@ function Row({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`group flex items-center gap-3 rounded px-3 py-2.5 ${
-        isDragging ? "z-10 bg-white/15 shadow-lg" : "hover:bg-white/10"
+        isDragging ? "z-10 bg-surface-3 shadow-lg" : "hover:bg-surface-2"
       }`}
     >
       <button
         {...attributes}
         {...listeners}
         aria-label={`Reorder ${song.title}`}
-        className="cursor-grab px-1 text-white/30 hover:text-white/70 active:cursor-grabbing"
+        className="cursor-grab px-1 text-ink-dim hover:text-ink-muted active:cursor-grabbing"
       >
         ⠿
       </button>
@@ -66,25 +66,25 @@ function Row({
         onClick={() => (isCurrent ? togglePlay() : playQueue(songs, index))}
         className="min-w-0 flex-1 text-left"
       >
-        <div className={`truncate font-medium ${isCurrent ? "text-green-500" : ""}`}>
+        <div className={`truncate font-medium ${isCurrent ? "text-brand" : ""}`}>
           {song.title}
           {isCurrent && <span className="ml-2 text-xs">{isPlaying ? "♪" : "❚❚"}</span>}
         </div>
-        <div className="truncate text-sm text-white/50">
+        <div className="truncate text-sm text-ink-muted">
           {song.artist ?? "Unknown artist"}
         </div>
       </button>
 
       <LikeButton songId={song.id} />
 
-      <span className="w-12 shrink-0 text-right text-sm tabular-nums text-white/40">
+      <span className="w-12 shrink-0 text-right text-sm tabular-nums text-ink-dim">
         {formatTime(song.durationSec)}
       </span>
 
       <button
         onClick={() => onRemove(song.id)}
         aria-label={`Remove ${song.title} from playlist`}
-        className="px-1 text-white/30 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
+        className="px-1 text-ink-dim opacity-0 transition hover:text-danger group-hover:opacity-100"
         data-playlist={playlistId}
       >
         ✕
@@ -164,7 +164,7 @@ export function PlaylistSongs({
 
   if (songs.length === 0) {
     return (
-      <p className="mt-10 text-white/50">
+      <p className="mt-10 text-ink-muted">
         This playlist is empty. Add songs with the &ldquo;+ Playlist&rdquo;
         button on any track.
       </p>
@@ -173,7 +173,7 @@ export function PlaylistSongs({
 
   return (
     <>
-      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-4 text-sm text-danger">{error}</p>}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

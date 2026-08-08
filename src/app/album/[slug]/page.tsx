@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { PlayAlbumButton, SongList } from "@/components/SongList";
 import { getAlbumWithSongs } from "@/lib/data";
+import { headerGradient } from "@/lib/tint";
 
 export const revalidate = 60;
 
@@ -19,46 +20,56 @@ export default async function AlbumPage({
   const { album, songs } = result;
 
   return (
-    <div className="px-4 py-6 sm:px-8">
-      <Link
-        href="/"
-        className="ml-14 text-sm text-white/50 hover:text-white lg:ml-0"
+    <div>
+      {/* Hero: soft colour-to-black wash, the same tint this album gets on its
+          card so the two read as the same object. */}
+      <header
+        className="relative px-4 pb-8 pt-6 sm:px-8"
+        style={{ backgroundImage: headerGradient(album.id) }}
       >
-        &larr; Back
-      </Link>
 
-      <header className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-end">
-        <div className="relative h-48 w-48 shrink-0 overflow-hidden rounded-lg shadow-2xl">
-          {album.coverUrl ? (
-            <Image
-              src={album.coverUrl}
-              alt={album.title}
-              fill
-              sizes="192px"
-              className="object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="h-full w-full bg-white/10" />
-          )}
-        </div>
+        <Link href="/" className="text-sm text-ink-muted transition hover:text-ink">
+          &larr; Back
+        </Link>
 
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/60">
-            Album
-          </p>
-          <h1 className="mt-2 text-4xl font-black sm:text-5xl">{album.title}</h1>
-          <p className="mt-3 text-sm text-white/60">
-            {album.description}
-            {album.artist && ` · ${album.artist}`} · {songs.length} songs
-          </p>
-          <div className="mt-5">
-            <PlayAlbumButton songs={songs} />
+        <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end">
+          <div className="relative h-44 w-44 shrink-0 overflow-hidden rounded-2xl shadow-2xl ring-1 ring-border sm:h-52 sm:w-52">
+            {album.coverUrl ? (
+              <Image
+                src={album.coverUrl}
+                alt={album.title}
+                fill
+                sizes="208px"
+                className="object-cover"
+                unoptimized
+                priority
+              />
+            ) : (
+              <div className="h-full w-full bg-surface-3" />
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-widest text-ink-muted">
+              Album
+            </p>
+            <h1 className="mt-2 text-4xl font-bold leading-tight sm:text-5xl">
+              {album.title}
+            </h1>
+            <p className="mt-3 text-sm text-ink-muted">
+              {album.description}
+              {album.artist && ` · ${album.artist}`} · {songs.length} songs
+            </p>
+            <div className="mt-6">
+              <PlayAlbumButton songs={songs} />
+            </div>
           </div>
         </div>
       </header>
 
-      <SongList songs={songs} />
+      <div className="px-4 pb-8 sm:px-8">
+        <SongList songs={songs} />
+      </div>
     </div>
   );
 }

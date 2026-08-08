@@ -39,6 +39,7 @@ interface SongRow {
   title: string;
   album_id: string;
   duration_sec: number | null;
+  waveform_peaks: number[] | null;
   artists: Embedded<{ name: string }>;
   albums: Embedded<{ title: string; cover_path: string | null }>;
 }
@@ -69,5 +70,6 @@ export function toSongDTO(row: SongRow): SongDTO {
     albumTitle: album?.title ?? null,
     coverUrl: coverUrl(album?.cover_path ?? null),
     durationSec: row.duration_sec,
+    waveformPeaks: row.waveform_peaks,
   };
 }

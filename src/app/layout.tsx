@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Roboto } from "next/font/google";
+import { Manrope } from "next/font/google";
 
+import { AppShell } from "@/components/AppShell";
 import { LikesProvider } from "@/components/LikesProvider";
-import { Sidebar } from "@/components/Sidebar";
-import { Playbar } from "@/components/player/Playbar";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 import "./globals.css";
 
-const roboto = Roboto({
-  variable: "--font-roboto",
+// Manrope: geometric but soft-cornered, and it has a genuinely light 200
+// weight, which is what carries the landing wordmark.
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
@@ -21,9 +22,11 @@ export const metadata: Metadata = {
 };
 
 /**
- * PlayerProvider and Playbar live here rather than in a page, because the root
- * layout is the only thing that survives navigation. Mounting the <audio>
- * element inside a page would stop the music every time you open an album.
+ * Signed out, the app chrome is not rendered at all -- the landing page is
+ * full-bleed with no sidebar or playbar. Signed in, PlayerProvider and the
+ * playbar live here rather than in a page, because the root layout is the only
+ * thing that survives navigation; mounting the <audio> element inside a page
+ * would stop the music every time you open an album.
  */
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const user = await getCurrentUser();
@@ -33,18 +36,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     null;
 
   return (
-    <html lang="en" className={`${roboto.variable} h-full antialiased`}>
-      <body className="min-h-full bg-black font-sans text-white">
-        <PlayerProvider>
-          {/* key on auth state so logging in or out remounts with fresh likes */}
-          <LikesProvider key={user?.id ?? "anon"} isSignedIn={Boolean(user)}>
-            <div className="flex min-h-screen">
-              <Sidebar displayName={displayName} />
-              <main className="min-w-0 flex-1 pb-28">{children}</main>
-            </div>
-            <Playbar />
-          </LikesProvider>
-        </PlayerProvider>
+    <html lang="en" className={`${manrope.variable} h-full antialiased`}>
+      <body className="h-full font-sans">
+        {user ? (
+          <PlayerProvider>
+            {/* key on auth state so logging in or out remounts with fresh likes */}
+            <LikesProvider key={user.id} isSignedIn>
+              <AppShell displayName={displayName}>{children}</AppShell>
+            </LikesProvider>
+          </PlayerProvider>
+        ) : (
+          children
+        )}
       </body>
     </html>
   );

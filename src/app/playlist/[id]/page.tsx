@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PlaylistSongs } from "@/components/PlaylistSongs";
-import { PlayAlbumButton } from "@/components/SongList";
+import { PlayAlbumButton, ShufflePlayButton } from "@/components/SongList";
+import { userHeaderGradient } from "@/lib/tint";
 import { getPlaylistWithSongs } from "@/lib/user-data";
 
 export const dynamic = "force-dynamic";
@@ -22,26 +23,33 @@ export default async function PlaylistPage({
   const { playlist, songs } = result;
 
   return (
-    <div className="px-4 py-6 sm:px-8">
-      <Link
-        href="/playlists"
-        className="ml-14 text-sm text-white/50 hover:text-white lg:ml-0"
+    <div>
+      {/* User playlists draw from a separate, cooler palette than the curated
+          albums, so your own lists never look like the built-in ones. */}
+      <header
+        className="px-4 pb-8 pt-6 sm:px-8"
+        style={{ backgroundImage: userHeaderGradient(playlist.id) }}
       >
-        &larr; Playlists
-      </Link>
+        <Link href="/playlists" className="text-sm text-ink-muted transition hover:text-ink">
+          &larr; Playlists
+        </Link>
 
-      <header className="mt-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-white/60">
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-ink-muted">
           Playlist
         </p>
-        <h1 className="mt-2 text-4xl font-black sm:text-5xl">{playlist.name}</h1>
-        <p className="mt-3 text-sm text-white/60">{songs.length} songs</p>
-        <div className="mt-5">
+        <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+          {playlist.name}
+        </h1>
+        <p className="mt-3 text-sm text-ink-muted">{songs.length} songs</p>
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <PlayAlbumButton songs={songs} />
+          <ShufflePlayButton songs={songs} />
         </div>
       </header>
 
-      <PlaylistSongs playlistId={playlist.id} initial={songs} />
+      <div className="px-4 pb-8 sm:px-8">
+        <PlaylistSongs playlistId={playlist.id} initial={songs} />
+      </div>
     </div>
   );
 }

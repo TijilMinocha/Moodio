@@ -114,7 +114,7 @@ export function LikeButton({ songId }: { songId: string }) {
       aria-pressed={isLiked}
       aria-label={isLiked ? "Remove from liked songs" : "Add to liked songs"}
       className={`shrink-0 px-1 text-lg transition ${
-        isLiked ? "text-green-500" : "text-white/30 hover:text-white"
+        isLiked ? "text-brand" : "text-ink-dim hover:text-ink"
       }`}
     >
       {isLiked ? "♥" : "♡"}

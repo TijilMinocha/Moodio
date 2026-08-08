@@ -1,18 +1,78 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-roboto);
+/**
+ * Moodio design tokens.
+ *
+ * Spotify's structure and restraint, with green swapped for a muted blue.
+ * Rules this palette follows:
+ *   - No neon. Every accent is desaturated enough to sit on near-black.
+ *   - Functional UI (icons, buttons, seekbar, active states) is blue ONLY.
+ *   - Colour lives in artwork and in soft colour-to-black gradients on cards
+ *     and page headers -- never in body text, never as a glow.
+ */
+@theme {
+  --font-sans: var(--font-manrope);
+
+  /* Base -- near-black with the faintest blue cast */
+  --color-bg: #0a0c10;
+  --color-surface: #14161c;
+  --color-surface-2: #1c1f27;
+  --color-surface-3: #262a34;
+  --color-border: #272c36;
+
+  /* Text */
+  --color-ink: #e9ecf2;
+  --color-ink-muted: #a2a9b6;
+  --color-ink-dim: #6b7280;
+
+  /* The one accent. Muted, not electric. */
+  --color-brand: #4d8df6;
+  --color-brand-hover: #6ba0ff;
+  --color-brand-dim: #2f6fd0;
+
+  --color-danger: #d8676c;
 }
 
-/* Moodio is dark-only, matching the original design. */
 html,
 body {
-  background: #000;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a2f3a transparent;
+}
+
+::selection {
+  background: var(--color-brand-dim);
   color: #fff;
 }
 
-/* Thin scrollbars so the queue panel doesn't get a chunky native bar. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/**
+ * Landing collage: album art tiled behind the hero, pushed back with a
+ * vignette so the wordmark stays readable. Netflix-style, not decorative.
+ */
+.vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 40%, transparent 0%, #0a0c10cc 55%, #0a0c10 85%),
+    linear-gradient(to top, #0a0c10 0%, #0a0c1099 35%, #0a0c1066 100%);
+}
+
+@keyframes equalizer {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.eq-bar {
+  animation: equalizer 0.9s ease-in-out infinite;
+  transform-origin: bottom;
 }

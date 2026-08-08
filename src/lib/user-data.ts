@@ -14,7 +14,7 @@ export interface PlaylistDTO {
 }
 
 const SONG_SELECT =
-  "id, title, album_id, duration_sec, artists ( name ), albums ( title, cover_path )";
+  "id, title, album_id, duration_sec, waveform_peaks, artists ( name ), albums ( title, cover_path )";
 
 /** Gap between adjacent positions, so an insert between two rows is one UPDATE. */
 export const POSITION_GAP = 1000;

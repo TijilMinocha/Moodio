@@ -44,8 +44,8 @@ function QueueRow({
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`group flex items-center gap-2 rounded px-2 py-2 text-sm ${
-        isDragging ? "z-10 bg-white/15 shadow-lg" : "hover:bg-white/10"
-      } ${isCurrent ? "text-green-500" : "text-white/85"}`}
+        isDragging ? "z-10 bg-surface-3 shadow-lg" : "hover:bg-surface-2"
+      } ${isCurrent ? "text-brand" : "text-ink"}`}
     >
       {/* Drag handle is its own element so clicking the row still plays it.
           dnd-kit's listeners include keyboard, so this is draggable via
@@ -53,7 +53,7 @@ function QueueRow({
       <button
         {...attributes}
         {...listeners}
-        className="cursor-grab px-1 text-white/30 hover:text-white/70 active:cursor-grabbing"
+        className="cursor-grab px-1 text-ink-dim hover:text-ink-muted active:cursor-grabbing"
         aria-label={`Reorder ${song.title}`}
       >
         ⠿
@@ -61,17 +61,17 @@ function QueueRow({
 
       <button onClick={onPlay} className="min-w-0 flex-1 text-left">
         <div className="truncate">{song.title}</div>
-        <div className="truncate text-xs text-white/50">
+        <div className="truncate text-xs text-ink-muted">
           {song.artist ?? "Unknown artist"}
         </div>
       </button>
 
-      <span className="text-xs tabular-nums text-white/40">
+      <span className="text-xs tabular-nums text-ink-dim">
         {formatTime(song.durationSec)}
       </span>
       <button
         onClick={onRemove}
-        className="px-1 text-white/30 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
+        className="px-1 text-ink-dim opacity-0 transition hover:text-danger group-hover:opacity-100"
         aria-label={`Remove ${song.title} from queue`}
       >
         ✕
@@ -81,8 +81,10 @@ function QueueRow({
 }
 
 export function QueuePanel() {
-  const { queue, current, jumpTo, removeFromQueue, reorderQueue, clearQueue } =
-    usePlayer();
+  const {
+    queue, current, shuffle, jumpTo, removeFromQueue, reorderQueue,
+    clearQueue, toggleShuffle,
+  } = usePlayer();
 
   const sensors = useSensors(
     // A small distance threshold means a click still registers as a click
@@ -103,20 +105,40 @@ export function QueuePanel() {
       <div className="flex items-center justify-between px-3 py-3">
         <h2 className="text-sm font-bold tracking-wide">
           Queue{" "}
-          <span className="font-normal text-white/40">({queue.length})</span>
+          <span className="font-normal text-ink-dim">({queue.length})</span>
         </h2>
         {queue.length > 0 && (
-          <button
-            onClick={clearQueue}
-            className="text-xs text-white/40 hover:text-white"
-          >
-            Clear
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Reorders playback, not the list below -- the queue stays in the
+                order you arranged it, so turning shuffle off restores it. */}
+            <button
+              onClick={toggleShuffle}
+              aria-pressed={shuffle}
+              title={
+                shuffle
+                  ? "Smart shuffle on - same artists spread apart"
+                  : "Smart shuffle"
+              }
+              className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+                shuffle
+                  ? "bg-brand/20 text-brand"
+                  : "text-ink-dim hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              ⤮ Shuffle
+            </button>
+            <button
+              onClick={clearQueue}
+              className="rounded-full px-2 py-1 text-xs text-ink-dim transition hover:bg-surface-2 hover:text-ink"
+            >
+              Clear
+            </button>
+          </div>
         )}
       </div>
 
       {queue.length === 0 ? (
-        <p className="px-3 text-xs leading-relaxed text-white/40">
+        <p className="px-3 text-xs leading-relaxed text-ink-dim">
           Nothing queued yet. Pick an album to start listening.
         </p>
       ) : (

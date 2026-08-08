@@ -19,7 +19,10 @@ import path from "node:path";
 
 import { config } from "dotenv";
 import { parseBuffer } from "music-metadata";
+import { MPEGDecoder } from "mpg123-decoder";
 import { createClient } from "@supabase/supabase-js";
+
+import { extractPeaks } from "../src/lib/waveform.js";
 
 config({ path: ".env.local" });
 
@@ -72,6 +75,27 @@ function splitTitleAndArtist(filename: string): {
     title: base.slice(0, idx).trim().replace(/\s+/g, " "),
     artist: base.slice(idx + 3).trim(),
   };
+}
+
+
+/**
+ * Decode the MP3 and reduce it to a waveform. This is the slow part of ingest
+ * (a few seconds per track) and precisely why it belongs here rather than in
+ * the browser -- see src/lib/waveform.ts.
+ */
+async function computePeaks(buffer: Buffer): Promise<number[] | null> {
+  const decoder = new MPEGDecoder();
+  try {
+    await decoder.ready;
+    const { channelData, samplesDecoded } = decoder.decode(new Uint8Array(buffer));
+    if (!samplesDecoded) return null;
+    return extractPeaks(channelData);
+  } catch (err) {
+    console.warn(`    waveform failed: ${(err as Error).message}`);
+    return null;
+  } finally {
+    decoder.free();
+  }
 }
 
 /** Insert the artist if new, and return its id either way. */
@@ -155,6 +179,8 @@ async function ingestFolder(folder: string) {
       );
     }
 
+    const peaks = await computePeaks(buffer);
+
     const storagePath = `${slug}/${file}`;
     const { error: uploadError } = await db.storage
       .from("audio")
@@ -171,6 +197,7 @@ async function ingestFolder(folder: string) {
         duration_sec: durationSec,
         storage_path: storagePath,
         content_hash: contentHash,
+        waveform_peaks: peaks,
         status: "ready",
       },
       { onConflict: "album_id,title" },
@@ -178,7 +205,9 @@ async function ingestFolder(folder: string) {
     if (songError) throw new Error(`song ${title}: ${songError.message}`);
 
     const mins = durationSec ? `${Math.floor(durationSec / 60)}:${String(durationSec % 60).padStart(2, "0")}` : "?:??";
-    console.log(`  + ${title} -- ${artist ?? info.title}  [${mins}]`);
+    console.log(
+      `  + ${title} -- ${artist ?? info.title}  [${mins}]${peaks ? "" : "  (no waveform)"}`,
+    );
   }
 }
 

@@ -38,8 +38,17 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isProtected =
-    pathname.startsWith("/liked") || pathname.startsWith("/playlist");
+
+  // The whole catalogue is behind the login now -- signed-out visitors only
+  // ever see the landing page. "/" is not listed because it renders the
+  // landing itself when there is no session.
+  const isProtected = [
+    "/album",
+    "/search",
+    "/liked",
+    "/playlist",
+    "/account",
+  ].some((p) => pathname.startsWith(p));
 
   if (!user && isProtected) {
     const url = request.nextUrl.clone();

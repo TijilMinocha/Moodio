@@ -40,6 +40,8 @@ export interface SongDTO {
   albumTitle: string | null;
   coverUrl: string | null;
   durationSec: number | null;
+  /** ~200 normalised peaks, precomputed at ingest. Null for older rows. */
+  waveformPeaks: number[] | null;
 }
 
 export interface AlbumDTO {

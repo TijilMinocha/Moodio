@@ -1,10 +1,30 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { usePlayer } from "@/components/player/PlayerProvider";
+import { Waveform } from "@/components/player/Waveform";
 import { formatTime } from "@/lib/format";
+
+/** Three animated bars, shown on the current track. */
+export function Equalizer({ playing }: { playing: boolean }) {
+  return (
+    <span className="flex h-3 items-end gap-[2px]" aria-hidden>
+      {[0, 0.3, 0.15].map((delay, i) => (
+        <span
+          key={i}
+          className={`w-[3px] rounded-sm bg-brand ${playing ? "eq-bar" : ""}`}
+          style={{
+            height: "100%",
+            animationDelay: `${delay}s`,
+            transform: playing ? undefined : "scaleY(0.35)",
+          }}
+        />
+      ))}
+    </span>
+  );
+}
 
 export function Playbar() {
   const {
@@ -13,9 +33,6 @@ export function Playbar() {
     toggleMute, toggleShuffle, cycleRepeat,
   } = usePlayer();
 
-  const seekRef = useRef<HTMLDivElement | null>(null);
-
-  // Keyboard shortcuts. Skipped while typing so space doesn't hijack inputs.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Ignore keys aimed at anything focusable. Space and the arrows already
@@ -47,33 +64,23 @@ export function Playbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [togglePlay, next, previous, seekToFraction, currentTime, duration]);
 
-  const progress = duration ? (currentTime / duration) * 100 : 0;
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = seekRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    seekToFraction((e.clientX - rect.left) / rect.width);
-  };
-
-  if (!current) return null;
+  // Nothing queued: keep the row's height so the grid doesn't jump when the
+  // first track starts.
+  if (!current) {
+    return (
+      <div className="hidden h-[4.5rem] items-center justify-center border-t border-border/60 bg-surface/80 px-6 text-sm text-ink-muted backdrop-blur lg:flex">
+        Pick an album to start listening
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-white/10 bg-[#1a1a1a]/95 backdrop-blur">
-      {/* Seekbar. Day 5 replaces this strip with the real waveform. */}
-      <div
-        ref={seekRef}
-        onClick={handleSeek}
-        className="group relative h-1.5 cursor-pointer bg-white/15"
-      >
-        <div
-          className="h-full bg-green-500 transition-[width] duration-100"
-          style={{ width: `${progress}%` }}
-        />
-        <div
-          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100"
-          style={{ left: `${progress}%` }}
-        />
-      </div>
+    <div className="border-t border-border/60 bg-surface/85 backdrop-blur">
+      <Waveform
+        peaks={current.waveformPeaks}
+        progress={duration ? currentTime / duration : 0}
+        onSeek={seekToFraction}
+      />
 
       <div className="flex items-center gap-4 px-4 py-3 sm:px-6">
         {/* Now playing */}
@@ -84,15 +91,18 @@ export function Playbar() {
               alt=""
               width={48}
               height={48}
-              className="hidden h-12 w-12 rounded object-cover sm:block"
+              className="hidden h-12 w-12 rounded-lg object-cover ring-1 ring-border sm:block"
               unoptimized
             />
           )}
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{current.title}</div>
-            <div className="truncate text-xs text-white/60">
+            <div className="flex items-center gap-2">
+              <Equalizer playing={isPlaying} />
+              <span className="truncate text-sm font-semibold">{current.title}</span>
+            </div>
+            <div className="truncate text-xs text-ink-muted">
               {error ? (
-                <span className="text-red-400">{error}</span>
+                <span className="text-danger">{error}</span>
               ) : loading ? (
                 "Loading..."
               ) : (
@@ -103,37 +113,49 @@ export function Playbar() {
         </div>
 
         {/* Transport */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={toggleShuffle}
             title="Shuffle"
             aria-pressed={shuffle}
-            className={`hidden text-lg sm:block ${shuffle ? "text-green-500" : "text-white/50 hover:text-white"}`}
+            className={`hidden rounded p-1.5 text-lg transition sm:block ${
+              shuffle ? "text-brand" : "text-ink-muted hover:text-ink"
+            }`}
           >
             ⤮
           </button>
-          <button onClick={previous} title="Previous (Shift+Left)" className="opacity-80 hover:opacity-100">
-            <Image src="/img/prevsong.svg" alt="Previous" width={30} height={30} className="invert" />
+          <button
+            onClick={previous}
+            title="Previous (Shift+Left)"
+            className="rounded p-1 opacity-70 transition hover:opacity-100"
+          >
+            <Image src="/img/prevsong.svg" alt="Previous" width={26} height={26} className="invert" />
           </button>
           <button
             onClick={togglePlay}
             title="Play/Pause (Space)"
-            className="rounded-full bg-white p-2 transition hover:scale-105"
+            className="grid h-11 w-11 place-items-center rounded-full bg-brand transition hover:brightness-110"
           >
             <Image
               src={isPlaying ? "/img/pause.svg" : "/img/play.svg"}
               alt={isPlaying ? "Pause" : "Play"}
-              width={22}
-              height={22}
+              width={20}
+              height={20}
             />
           </button>
-          <button onClick={next} title="Next (Shift+Right)" className="opacity-80 hover:opacity-100">
-            <Image src="/img/nextsong.svg" alt="Next" width={30} height={30} className="invert" />
+          <button
+            onClick={next}
+            title="Next (Shift+Right)"
+            className="rounded p-1 opacity-70 transition hover:opacity-100"
+          >
+            <Image src="/img/nextsong.svg" alt="Next" width={26} height={26} className="invert" />
           </button>
           <button
             onClick={cycleRepeat}
             title={`Repeat: ${repeat}`}
-            className={`hidden text-lg sm:block ${repeat !== "off" ? "text-green-500" : "text-white/50 hover:text-white"}`}
+            className={`hidden rounded p-1.5 text-base transition sm:block ${
+              repeat !== "off" ? "text-brand" : "text-ink-muted hover:text-ink"
+            }`}
           >
             {repeat === "one" ? "🔂" : "🔁"}
           </button>
@@ -141,15 +163,15 @@ export function Playbar() {
 
         {/* Time + volume */}
         <div className="flex flex-1 items-center justify-end gap-3">
-          <span className="hidden text-xs tabular-nums text-white/60 md:inline">
+          <span className="hidden text-xs tabular-nums text-ink-muted md:inline">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
-          <button onClick={toggleMute} title="Mute">
+          <button onClick={toggleMute} title="Mute" className="opacity-70 hover:opacity-100">
             <Image
               src={muted || volume === 0 ? "/img/mute.svg" : "/img/volume.svg"}
               alt="Volume"
-              width={22}
-              height={22}
+              width={20}
+              height={20}
               className="invert"
             />
           </button>
@@ -161,7 +183,7 @@ export function Playbar() {
             max={100}
             value={muted ? 0 : Math.round(volume * 100)}
             onChange={(e) => setVolume(Number(e.target.value) / 100)}
-            className="hidden w-24 accent-green-500 sm:block"
+            className="hidden w-24 accent-brand sm:block"
             aria-label="Volume"
           />
         </div>
