@@ -28,6 +28,8 @@ interface PlayerState {
   repeat: RepeatMode;
   loading: boolean;
   error: string | null;
+  /** e.g. "160 kbps", "original" -- what is actually streaming right now. */
+  quality: string | null;
 }
 
 interface PlayerActions {
@@ -66,6 +68,7 @@ export function usePlayer() {
  */
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const hlsRef = useRef<import("hls.js").default | null>(null);
 
   const [queue, setQueue] = useState<SongDTO[]>([]);
   const [index, setIndex] = useState(0);
@@ -78,6 +81,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [repeat, setRepeat] = useState<RepeatMode>("off");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Human-readable label for the ladder hls.js currently has selected.
+  const [quality, setQuality] = useState<string | null>(null);
 
   // Playback order over `queue`. With shuffle off this is [0,1,2,...].
   const playOrderRef = useRef<number[]>([]);
@@ -111,33 +116,100 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  /** Fetch a fresh signed URL and point the audio element at it. */
-  const loadSong = useCallback(async (song: SongDTO, autoplay: boolean) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const token = ++requestTokenRef.current;
-    setLoading(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/songs/${song.id}/stream`);
-      if (!res.ok) throw new Error(`Could not load "${song.title}"`);
-      const { url } = (await res.json()) as { url: string };
-
-      // A newer request landed while we were waiting -- discard this one.
-      if (token !== requestTokenRef.current) return;
-
-      audio.src = url;
-      if (autoplay) await audio.play();
-    } catch (err) {
-      if (token !== requestTokenRef.current) return;
-      setError(err instanceof Error ? err.message : "Playback failed");
-      setIsPlaying(false);
-    } finally {
-      if (token === requestTokenRef.current) setLoading(false);
+  /** Tear down any hls.js instance attached to the audio element. */
+  const detachHls = useCallback(() => {
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
     }
   }, []);
+
+  /**
+   * Point the audio element at a song.
+   *
+   * Prefers HLS so quality adapts to the listener's bandwidth mid-track. Three
+   * paths, in order:
+   *
+   *   1. hls.js via Media Source Extensions -- Chrome, Firefox, Edge.
+   *   2. Native HLS -- Safari plays .m3u8 straight from an <audio> src.
+   *   3. Progressive MP3 -- browsers with neither, and songs not transcoded yet.
+   *
+   * The fallback matters: a song added but not yet run through
+   * `npm run transcode` still plays, just without adaptive switching.
+   */
+  const loadSong = useCallback(
+    async (song: SongDTO, autoplay: boolean) => {
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      const token = ++requestTokenRef.current;
+      setLoading(true);
+      setError(null);
+      detachHls();
+
+      const playProgressive = async () => {
+        const res = await fetch(`/api/songs/${song.id}/stream`);
+        if (!res.ok) throw new Error(`Could not load "${song.title}"`);
+        const { url } = (await res.json()) as { url: string };
+        if (token !== requestTokenRef.current) return;
+        audio.src = url;
+        setQuality("original");
+        if (autoplay) await audio.play();
+      };
+
+      try {
+        const manifestUrl = `/api/songs/${song.id}/manifest`;
+        const head = await fetch(manifestUrl, { method: "HEAD" });
+        if (token !== requestTokenRef.current) return;
+
+        if (!head.ok) {
+          await playProgressive();
+          return;
+        }
+
+        const { default: Hls } = await import("hls.js");
+        if (token !== requestTokenRef.current) return;
+
+        if (Hls.isSupported()) {
+          const hls = new Hls({ enableWorker: true });
+          hlsRef.current = hls;
+
+          hls.on(Hls.Events.LEVEL_SWITCHED, (_e, data) => {
+            const level = hls.levels[data.level];
+            if (level) setQuality(`${Math.round(level.bitrate / 1000)} kbps`);
+          });
+
+          hls.on(Hls.Events.ERROR, (_e, data) => {
+            // Only fatal errors matter -- hls.js recovers from the rest itself.
+            if (!data.fatal) return;
+            console.error("hls fatal", data.type, data.details);
+            detachHls();
+            void playProgressive().catch(() => {
+              setError("Playback failed");
+              setIsPlaying(false);
+            });
+          });
+
+          hls.loadSource(manifestUrl);
+          hls.attachMedia(audio);
+          if (autoplay) await audio.play();
+        } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+          audio.src = manifestUrl;
+          setQuality("auto");
+          if (autoplay) await audio.play();
+        } else {
+          await playProgressive();
+        }
+      } catch (err) {
+        if (token !== requestTokenRef.current) return;
+        setError(err instanceof Error ? err.message : "Playback failed");
+        setIsPlaying(false);
+      } finally {
+        if (token === requestTokenRef.current) setLoading(false);
+      }
+    },
+    [detachHls],
+  );
 
   /** Advance through playOrder. `auto` distinguishes song-ended from a click. */
   const advance = useCallback(
@@ -215,12 +287,21 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     };
   }, [advance]);
 
+  // Destroy any live hls.js instance when the provider goes away.
+  useEffect(() => detachHls, [detachHls]);
+
   // Load whenever the current song changes.
   const currentId = current?.id ?? null;
   useEffect(() => {
     if (!current) return;
+    // loadSong flips `loading` before it starts fetching. This effect is the
+    // sanctioned case for that rule -- synchronising an external system (the
+    // audio element / hls.js) with React state -- and the loading flag is part
+    // of that synchronisation, not derived data.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadSong(current, true);
-    // Keyed on id so re-renders with an equal object don't reload the track.
+    // Keyed on id alone: re-running on every `current` object identity or on a
+    // new loadSong reference would restart the track mid-playback.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId]);
 
@@ -367,6 +448,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   const clearQueue = useCallback(() => {
     const audio = audioRef.current;
+    detachHls();
     if (audio) {
       audio.pause();
       audio.src = "";
@@ -378,7 +460,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
-  }, []);
+  }, [detachHls]);
 
   const value = useMemo(
     () => ({
@@ -394,6 +476,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       repeat,
       loading,
       error,
+      quality,
       playQueue,
       shufflePlay,
       togglePlay,
@@ -413,7 +496,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       queue, index, current, isPlaying, currentTime, duration, volume, muted,
-      shuffle, repeat, loading, error, playQueue, shufflePlay, togglePlay, advance,
+      shuffle, repeat, loading, error, quality, playQueue, shufflePlay, togglePlay, advance,
       seekToFraction, setVolume, toggleShuffle, cycleRepeat, addToQueue,
       playNext, removeFromQueue, reorderQueue, clearQueue, jumpTo,
     ],

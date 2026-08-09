@@ -59,12 +59,6 @@ export function Sidebar({
         />
       )}
 
-      {/* Positioning is scoped to max-lg so the mobile drawer and the desktop
-          grid placement never apply at once. The open/closed offset is an
-          inline style rather than a Tailwind translate utility: it is dynamic
-          state, and the utility version resolved unreliably against the
-          desktop override (the sidebar ended up sitting on top of the page
-          content on mobile). `lg:!translate-none` guards the desktop case. */}
       {/* The drawer offset is an inline style driven by React state rather
           than a CSS class. Both the Tailwind translate utilities and a plain
           CSS rule failed to apply reliably here -- the closed state worked but
@@ -104,6 +98,12 @@ export function Sidebar({
               onNavigate={onClose}
               label="Home"
               icon={<Image src="/img/home.svg" alt="" width={18} height={18} className="invert" />}
+            />
+            <NavLink
+              href="/moods"
+              onNavigate={onClose}
+              label="Moods"
+              icon={<span className="text-sm">◐</span>}
             />
             <NavLink
               href="/search"

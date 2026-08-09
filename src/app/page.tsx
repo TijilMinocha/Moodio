@@ -1,6 +1,9 @@
 import { AlbumCard } from "@/components/AlbumCard";
 import { Landing } from "@/components/Landing";
+import Link from "next/link";
 import { getAlbums } from "@/lib/data";
+import { MOOD_LIST } from "@/lib/moods";
+import { washFrom } from "@/lib/tint";
 import { getCurrentUser } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +36,31 @@ export default async function HomePage() {
           {albums.length} curated playlists
         </p>
       </header>
+
+      <section className="mb-10">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-semibold">Pick a mood</h2>
+          <Link href="/moods" className="text-xs text-ink-muted hover:text-ink">
+            See the library map &rarr;
+          </Link>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {MOOD_LIST.map((mood) => (
+            <Link
+              key={mood.slug}
+              href={`/mood/${mood.slug}`}
+              className="relative overflow-hidden rounded-xl bg-surface px-4 py-3.5 transition-colors hover:bg-surface-2"
+            >
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0"
+                style={{ backgroundImage: washFrom(mood.tint) }}
+              />
+              <span className="relative font-semibold">{mood.name}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
 
       {albums.length === 0 ? (
         <p className="text-ink-muted">

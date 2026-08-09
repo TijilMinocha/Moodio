@@ -29,7 +29,7 @@ export function Equalizer({ playing }: { playing: boolean }) {
 export function Playbar() {
   const {
     current, isPlaying, currentTime, duration, volume, muted, shuffle, repeat,
-    loading, error, togglePlay, next, previous, seekToFraction, setVolume,
+    loading, error, quality, togglePlay, next, previous, seekToFraction, setVolume,
     toggleMute, toggleShuffle, cycleRepeat,
   } = usePlayer();
 
@@ -163,6 +163,16 @@ export function Playbar() {
 
         {/* Time + volume */}
         <div className="flex flex-1 items-center justify-end gap-3">
+          {/* Makes adaptive switching visible -- otherwise the whole HLS
+              ladder is invisible to anyone looking at the app. */}
+          {quality && (
+            <span
+              title="Streaming quality, chosen automatically from your bandwidth"
+              className="hidden rounded-full border border-border px-2 py-0.5 text-[0.65rem] font-medium text-ink-dim lg:inline"
+            >
+              {quality}
+            </span>
+          )}
           <span className="hidden text-xs tabular-nums text-ink-muted md:inline">
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>

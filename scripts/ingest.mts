@@ -23,6 +23,9 @@ import { MPEGDecoder } from "mpg123-decoder";
 import { createClient } from "@supabase/supabase-js";
 
 import { extractPeaks } from "../src/lib/waveform.js";
+import { computeFeatures, type AudioFeatures } from "../src/lib/mood.js";
+
+import { CATALOGUE_PREFIX } from "../src/lib/cache-keys.js";
 
 config({ path: ".env.local" });
 
@@ -83,16 +86,29 @@ function splitTitleAndArtist(filename: string): {
  * (a few seconds per track) and precisely why it belongs here rather than in
  * the browser -- see src/lib/waveform.ts.
  */
-async function computePeaks(buffer: Buffer): Promise<number[] | null> {
+interface Analysis {
+  peaks: number[] | null;
+  features: AudioFeatures | null;
+}
+
+async function analyse(buffer: Buffer): Promise<Analysis> {
   const decoder = new MPEGDecoder();
   try {
     await decoder.ready;
-    const { channelData, samplesDecoded } = decoder.decode(new Uint8Array(buffer));
-    if (!samplesDecoded) return null;
-    return extractPeaks(channelData);
+    const { channelData, samplesDecoded, sampleRate } = decoder.decode(
+      new Uint8Array(buffer),
+    );
+    if (!samplesDecoded) return { peaks: null, features: null };
+
+    // One decode feeds both the waveform and the mood features -- decoding is
+    // by far the expensive part, so it would be wasteful to do it twice.
+    return {
+      peaks: extractPeaks(channelData),
+      features: computeFeatures(channelData, sampleRate),
+    };
   } catch (err) {
-    console.warn(`    waveform failed: ${(err as Error).message}`);
-    return null;
+    console.warn(`    analysis failed: ${(err as Error).message}`);
+    return { peaks: null, features: null };
   } finally {
     decoder.free();
   }
@@ -179,7 +195,7 @@ async function ingestFolder(folder: string) {
       );
     }
 
-    const peaks = await computePeaks(buffer);
+    const { peaks, features } = await analyse(buffer);
 
     const storagePath = `${slug}/${file}`;
     const { error: uploadError } = await db.storage
@@ -198,6 +214,9 @@ async function ingestFolder(folder: string) {
         storage_path: storagePath,
         content_hash: contentHash,
         waveform_peaks: peaks,
+        energy: features?.energy ?? null,
+        brightness: features?.brightness ?? null,
+        tempo: features?.tempo ?? null,
         status: "ready",
       },
       { onConflict: "album_id,title" },
@@ -206,7 +225,10 @@ async function ingestFolder(folder: string) {
 
     const mins = durationSec ? `${Math.floor(durationSec / 60)}:${String(durationSec % 60).padStart(2, "0")}` : "?:??";
     console.log(
-      `  + ${title} -- ${artist ?? info.title}  [${mins}]${peaks ? "" : "  (no waveform)"}`,
+      `  + ${title.padEnd(32)} [${mins}]` +
+        (features
+          ? `  energy ${features.energy.toFixed(3)}  bright ${features.brightness.toFixed(3)}  ${features.tempo ?? "?"} bpm`
+          : "  (analysis failed)"),
     );
   }
 }
@@ -230,7 +252,31 @@ async function main() {
     .from("songs")
     .select("*", { count: "exact", head: true });
   console.log(`\nDone. ${count} songs in the catalogue.`);
+  await invalidateCatalogueCache();
 }
+
+
+/**
+ * Drop the catalogue cache so a newly added song appears immediately rather
+ * than after the TTL expires. Silent no-op when Redis is not configured.
+ */
+async function invalidateCatalogueCache(): Promise<void> {
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!redisUrl || !redisToken) return;
+
+  try {
+    const { Redis } = await import("@upstash/redis");
+    const redis = new Redis({ url: redisUrl, token: redisToken });
+    const keys = await redis.keys(CATALOGUE_PREFIX + "*");
+    if (keys.length === 0) return;
+    await redis.del(...keys);
+    console.log("Invalidated " + keys.length + " cache key(s).");
+  } catch (err) {
+    console.warn("Cache invalidation skipped: " + (err as Error).message);
+  }
+}
+
 
 main().catch((err) => {
   console.error("\nIngest failed:", err.message);

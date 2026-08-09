@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import { requireUser } from "@/lib/require-user";
 
 /** Long enough for any song, short enough that a leaked link dies quickly. */
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -22,6 +23,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+
+  const auth = await requireUser();
+  if (!auth.ok) return auth.response;
   const db = createAdminClient();
 
   const { data: song, error } = await db

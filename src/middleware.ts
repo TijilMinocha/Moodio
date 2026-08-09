@@ -48,6 +48,8 @@ export async function middleware(request: NextRequest) {
     "/liked",
     "/playlist",
     "/account",
+    "/moods",
+    "/mood",
   ].some((p) => pathname.startsWith(p));
 
   if (!user && isProtected) {
