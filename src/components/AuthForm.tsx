@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { EyeIcon, EyeOffIcon } from "@/components/icons";
 import type { AuthResult } from "@/app/auth/actions";
 
 const field =
@@ -32,6 +33,7 @@ export function AuthForm({
   next?: string;
 }) {
   const [state, formAction] = useActionState<AuthResult, FormData>(action, {});
+  const [showPassword, setShowPassword] = useState(false);
   const isSignup = mode === "signup";
 
   return (
@@ -60,14 +62,26 @@ export function AuthForm({
 
         <label className="block">
           <span className="text-xs font-medium text-ink-muted">Password</span>
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete={isSignup ? "new-password" : "current-password"}
-            className={field}
-          />
+          <div className="relative">
+            <input
+              name="password"
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
+              autoComplete={isSignup ? "new-password" : "current-password"}
+              className={`${field} pr-11`}
+            />
+            {/* type="button" matters: inside a form a bare <button> submits. */}
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="absolute right-1 top-1.5 grid h-9 w-9 place-items-center rounded-lg text-ink-dim transition hover:text-ink"
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
           {isSignup && (
             <span className="mt-1.5 block text-xs text-ink-dim">
               At least 8 characters.

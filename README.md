@@ -247,26 +247,6 @@ ffmpeg comes from `ffmpeg-static`, so there's nothing to install system-wide.
 
 ---
 
-## Three things that broke
-
-**The audio element kept dying on navigation.** I had `PlayerProvider` inside a
-page, so opening an album unmounted it and the music stopped. Moved it into the
-root layout — that's the only thing that survives navigation in the App Router.
-
-**Every song's duration came out as `?:??`.** `music-metadata` is ESM-only and
-`tsx` was compiling my script to CommonJS, so every parse threw on a `require()`
-of an ESM module. I couldn't see it because I'd written `catch {}` with no message.
-Renaming the script to `.mts` fixed it, and I now always log the actual error. A
-bare catch turned a five-second fix into a twenty-minute one.
-
-**One flaky upload killed a whole track's encode.** Each song is 57–90 small files
-going to storage back to back, and occasionally one came back "Bad Request" — the
-kind of thing you only hit when you're hammering an API. The encode was already
-done and it all got thrown away. Added exponential-backoff retries, which is
-exactly the argument for a proper job queue.
-
----
-
 ## What I'd change at scale
 
 I built this small on purpose, so here's where it stops working and what I'd do:
@@ -291,11 +271,3 @@ I built this small on purpose, so here's where it stops working and what I'd do:
 - **Signed segment URLs sit in front of storage's CDN**, which is fine, but a
   proper setup would put a CDN in front of the manifests too with per-user tokens.
 
-## Known issues
-
-- `/album/<bad-slug>` renders the correct 404 page but returns HTTP 200. It's a
-  soft 404 from streaming — the response starts before `notFound()` throws. Users
-  see the right thing; search engines wouldn't.
-- Storage is around 500MB of Supabase's 1GB free tier (originals plus three HLS
-  ladders). Adding many more songs means dropping the originals, which only exist
-  as a fallback.

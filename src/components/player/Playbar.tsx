@@ -3,6 +3,11 @@
 import Image from "next/image";
 import { useEffect } from "react";
 
+import {
+  RepeatIcon,
+  RepeatOneIcon,
+  ShuffleIcon,
+} from "@/components/icons";
 import { usePlayer } from "@/components/player/PlayerProvider";
 import { Waveform } from "@/components/player/Waveform";
 import { formatTime } from "@/lib/format";
@@ -116,13 +121,13 @@ export function Playbar() {
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={toggleShuffle}
-            title="Shuffle"
+            title="Smart shuffle"
             aria-pressed={shuffle}
-            className={`hidden rounded p-1.5 text-lg transition sm:block ${
-              shuffle ? "text-brand" : "text-ink-muted hover:text-ink"
+            className={`hidden rounded-full p-1.5 transition sm:block ${
+              shuffle ? "text-brand" : "text-ink opacity-70 hover:opacity-100"
             }`}
           >
-            ⤮
+            <ShuffleIcon size={24} />
           </button>
           <button
             onClick={previous}
@@ -153,11 +158,11 @@ export function Playbar() {
           <button
             onClick={cycleRepeat}
             title={`Repeat: ${repeat}`}
-            className={`hidden rounded p-1.5 text-base transition sm:block ${
-              repeat !== "off" ? "text-brand" : "text-ink-muted hover:text-ink"
+            className={`hidden rounded-full p-1.5 transition sm:block ${
+              repeat !== "off" ? "text-brand" : "text-ink opacity-70 hover:opacity-100"
             }`}
           >
-            {repeat === "one" ? "🔂" : "🔁"}
+            {repeat === "one" ? <RepeatOneIcon size={24} /> : <RepeatIcon size={24} />}
           </button>
         </div>
 

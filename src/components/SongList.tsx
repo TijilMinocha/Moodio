@@ -1,6 +1,7 @@
 "use client";
 
 import { AddToPlaylist } from "@/components/AddToPlaylist";
+import { ShuffleIcon } from "@/components/icons";
 import { LikeButton, useLikes } from "@/components/LikesProvider";
 import { Equalizer } from "@/components/player/Playbar";
 import { usePlayer } from "@/components/player/PlayerProvider";
@@ -126,9 +127,10 @@ export function ShufflePlayButton({ songs }: { songs: SongDTO[] }) {
     <button
       onClick={() => shufflePlay(songs)}
       title="Shuffle - spreads the same artist apart"
-      className="rounded-full border border-border px-6 py-3 font-semibold text-ink-muted transition hover:border-brand hover:text-ink"
+      className="flex items-center gap-2 rounded-full border border-border px-6 py-3 font-semibold text-ink-muted transition hover:border-brand hover:text-ink"
     >
-      ⤮ Shuffle
+      <ShuffleIcon size={18} />
+      Shuffle
     </button>
   );
 }

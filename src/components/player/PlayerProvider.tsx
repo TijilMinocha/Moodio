@@ -15,6 +15,34 @@ import { buildPlayOrder } from "@/lib/shuffle";
 
 export type RepeatMode = "off" | "all" | "one";
 
+/**
+ * `play()` rejects with an AbortError whenever a new load interrupts it, which
+ * happens every time the user skips tracks. Chrome words it as "The play()
+ * request was interrupted by a call to pause()". It is noise, not an error.
+ */
+function isBenignPlaybackAbort(err: unknown): boolean {
+  if (err instanceof DOMException && err.name === "AbortError") return true;
+  const message = err instanceof Error ? err.message : "";
+  return /interrupted by|aborted|removed from the document/i.test(message);
+}
+
+/**
+ * Every play() in this file goes through here.
+ *
+ * A bare `audio.play()` returns a promise that rejects on interruption, and an
+ * uncaught rejection surfaces as a "Runtime AbortError" in Next's dev overlay
+ * even though nothing is actually broken. Swallowing only the benign aborts
+ * keeps real failures visible.
+ */
+async function safePlay(audio: HTMLAudioElement): Promise<void> {
+  try {
+    await audio.play();
+  } catch (err) {
+    if (isBenignPlaybackAbort(err)) return;
+    throw err;
+  }
+}
+
 interface PlayerState {
   queue: SongDTO[];
   index: number;
@@ -154,7 +182,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         if (token !== requestTokenRef.current) return;
         audio.src = url;
         setQuality("original");
-        if (autoplay) await audio.play();
+        if (autoplay) await safePlay(audio);
       };
 
       try {
@@ -192,16 +220,20 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
           hls.loadSource(manifestUrl);
           hls.attachMedia(audio);
-          if (autoplay) await audio.play();
+          if (autoplay) await safePlay(audio);
         } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
           audio.src = manifestUrl;
           setQuality("auto");
-          if (autoplay) await audio.play();
+          if (autoplay) await safePlay(audio);
         } else {
           await playProgressive();
         }
       } catch (err) {
         if (token !== requestTokenRef.current) return;
+        // Changing tracks quickly makes the browser abort the in-flight
+        // play(). That is expected, not a failure the user should ever read
+        // about -- the new track is already loading.
+        if (isBenignPlaybackAbort(err)) return;
         setError(err instanceof Error ? err.message : "Playback failed");
         setIsPlaying(false);
       } finally {
@@ -260,7 +292,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const onEnded = () => {
       if (repeatRef.current === "one") {
         audio.currentTime = 0;
-        void audio.play();
+        void safePlay(audio);
         return;
       }
       advance(1, true);
@@ -343,7 +375,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || !current) return;
-    if (audio.paused) void audio.play();
+    if (audio.paused) void safePlay(audio);
     else audio.pause();
   }, [current]);
 

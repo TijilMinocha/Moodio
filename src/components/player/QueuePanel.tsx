@@ -21,6 +21,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+import { ShuffleIcon } from "@/components/icons";
 import { usePlayer } from "@/components/player/PlayerProvider";
 import { formatTime } from "@/lib/format";
 import type { SongDTO } from "@/lib/types";
@@ -119,13 +120,13 @@ export function QueuePanel() {
                   ? "Smart shuffle on - same artists spread apart"
                   : "Smart shuffle"
               }
-              className={`rounded-full px-2.5 py-1 text-xs font-medium transition ${
+              className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
                 shuffle
                   ? "bg-brand/20 text-brand"
                   : "text-ink-dim hover:bg-surface-2 hover:text-ink"
               }`}
             >
-              ⤮ Shuffle
+              <ShuffleIcon size={14} /> Shuffle
             </button>
             <button
               onClick={clearQueue}

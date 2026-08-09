@@ -4,6 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import {
+  HeartIcon,
+  HomeIcon,
+  MoodIcon,
+  PlaylistIcon,
+  SearchIcon,
+} from "@/components/icons";
 import { QueuePanel } from "@/components/player/QueuePanel";
 import { UserStrip } from "@/components/UserStrip";
 import { LG_QUERY, useMediaQuery } from "@/lib/useMediaQuery";
@@ -27,13 +34,13 @@ function NavLink({
       href={href}
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
-      className={`flex items-center gap-3.5 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+      className={`flex items-center gap-3.5 rounded-xl px-3 py-3 text-[0.95rem] font-bold tracking-tight transition ${
         active
           ? "bg-brand/15 text-brand"
           : "text-ink-muted hover:bg-surface-2 hover:text-ink"
       }`}
     >
-      <span className="grid w-5 place-items-center">{icon}</span>
+      <span className="grid w-5 shrink-0 place-items-center">{icon}</span>
       {label}
     </Link>
   );
@@ -74,7 +81,7 @@ export function Sidebar({
                 transition: "transform 200ms ease",
               }
         }
-        className="flex flex-col gap-2 p-2 max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-[17rem]"
+        className="flex h-full min-h-0 flex-col gap-2 overflow-hidden p-2 max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-50 max-lg:w-[17rem]"
       >
         <div className="rounded-2xl border border-border/60 bg-surface p-4">
           <div className="flex items-center justify-between">
@@ -97,19 +104,19 @@ export function Sidebar({
               href="/"
               onNavigate={onClose}
               label="Home"
-              icon={<Image src="/img/home.svg" alt="" width={18} height={18} className="invert" />}
+              icon={<HomeIcon />}
             />
             <NavLink
               href="/moods"
               onNavigate={onClose}
               label="Moods"
-              icon={<span className="text-sm">◐</span>}
+              icon={<MoodIcon />}
             />
             <NavLink
               href="/search"
               onNavigate={onClose}
               label="Search"
-              icon={<Image src="/img/search.svg" alt="" width={18} height={18} className="invert" />}
+              icon={<SearchIcon />}
             />
             {displayName && (
               <>
@@ -117,15 +124,13 @@ export function Sidebar({
                   href="/liked"
                   onNavigate={onClose}
                   label="Liked Songs"
-                  icon={<span className="text-base text-danger">♥</span>}
+                  icon={<HeartIcon className="text-danger" />}
                 />
                 <NavLink
                   href="/playlists"
                   onNavigate={onClose}
                   label="Playlists"
-                  icon={
-                    <Image src="/img/playlist.svg" alt="" width={18} height={18} className="invert" />
-                  }
+                  icon={<PlaylistIcon />}
                 />
               </>
             )}

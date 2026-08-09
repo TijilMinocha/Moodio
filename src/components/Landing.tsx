@@ -52,7 +52,9 @@ export function Landing({
             alt=""
             width={44}
             height={44}
-            className="rounded-lg"
+            /* brightness-0 flattens the mark to black, invert then makes it
+               pure white -- works whatever colours the source file uses. */
+            className="brightness-0 invert"
           />
           <h1 className="mt-6 text-6xl font-extralight tracking-tight text-ink sm:text-7xl lg:text-8xl">
             moodio

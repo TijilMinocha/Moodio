@@ -32,9 +32,6 @@ export default async function HomePage() {
         <h1 className="text-3xl font-bold tracking-tight">
           Good to see you, {displayName}
         </h1>
-        <p className="mt-1.5 text-sm text-ink-muted">
-          {albums.length} curated playlists
-        </p>
       </header>
 
       <section className="mb-10">
@@ -61,6 +58,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <h2 className="mb-3 text-lg font-semibold">Curated playlists for you</h2>
 
       {albums.length === 0 ? (
         <p className="text-ink-muted">
